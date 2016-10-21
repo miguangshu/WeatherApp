@@ -1,0 +1,31 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 21
+    buildToolsVersion "20.0.0"
+    defaultConfig {
+        applicationId 'com.miguangshu.mi'
+        minSdkVersion 15
+        targetSdkVersion 21
+        versionCode 1
+        versionName "1.0"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    productFlavors {
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    testCompile 'junit:junit:4.12'
+    //    compile 'com.android.support:appcompat-v7:21.4.0'
+    //    compile 'com.android.support:design:21.4.0'
+    compile files('libs/android-support-v13.jar')
+    compile files('libs/Bughd_android_sdk_v1.2.6.jar')
+    compile files('libs/locSDK_5.3.jar')
+}
