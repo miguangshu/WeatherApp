@@ -43,8 +43,7 @@ public class BaseActivity extends SwipeBackActivity {
 	}
 
 	protected List<City> getTmpCities() {
-		Cursor tmpCityCursor = mContentResolver.query(
-				CityProvider.TMPCITY_CONTENT_URI, null, null, null, CityConstants.ORDER_INDEX + " ASC");
+		Cursor tmpCityCursor = mContentResolver.query(CityProvider.TMPCITY_CONTENT_URI, null, null, null, CityConstants.ORDER_INDEX + " ASC");
 		return SystemUtils.getTmpCities(tmpCityCursor);
 	}
 
@@ -78,8 +77,7 @@ public class BaseActivity extends SwipeBackActivity {
 
 	protected void addOrUpdateLocationCity(City city) {
 		// 先删除已定位城市
-		mContentResolver.delete(CityProvider.TMPCITY_CONTENT_URI,
-				CityConstants.ISLOCATION + "=?", new String[] { "1" });
+		mContentResolver.delete(CityProvider.TMPCITY_CONTENT_URI,CityConstants.ISLOCATION + "=?", new String[] { "1" });
 
 		// 存储
 		ContentValues tmpContentValues = new ContentValues();
@@ -88,8 +86,7 @@ public class BaseActivity extends SwipeBackActivity {
 		tmpContentValues.put(CityConstants.REFRESH_TIME, 0L);// 无刷新时间
 		tmpContentValues.put(CityConstants.ISLOCATION, 1);// 手动选择的城市存储为0
 		tmpContentValues.put(CityConstants.ORDER_INDEX, getTmpCities().size());
-		mContentResolver.insert(CityProvider.TMPCITY_CONTENT_URI,
-				tmpContentValues);
+		mContentResolver.insert(CityProvider.TMPCITY_CONTENT_URI,tmpContentValues);
 	}
 
 }

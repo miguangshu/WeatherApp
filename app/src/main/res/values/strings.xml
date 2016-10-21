@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">开天眼</string>
+    <string name="app_name">開天眼</string>
     <string name="press_again_exit">再按一次退出</string>
     <string name="speak_launch_project_weather">Launch Project Weather web site</string>
     <string name="pull_to_refresh_pull_sub_label">上次刷新:%s</string>

@@ -87,7 +87,15 @@ public class WeatherPagerAdapter extends FragmentPagerAdapter {
 
 	@Override
 	public CharSequence getPageTitle(int position) {
-		return mCitys.get(position).getName();
+		City city = mCitys.get(position);
+		String cityName = "--";
+		if(city.getIsLocation()){
+			cityName = city.getName()+city.getAreaCode();
+		}else {
+			cityName = city.getName();
+		}
+
+		return cityName;
 	}
 
 	/**

@@ -304,11 +304,12 @@ public class QueryCityActivity extends BaseActivity implements OnClickListener,
 		}
 
 		@Override
-		public void succeed(String name) {
-			L.i("liweiping", name);
+		public void succeed(String cityName,String districtName) {
+			L.i("cityName", cityName);
+			L.i("districtName",districtName);
 			dismissCountDownView();
-
-			City city = getLocationCityFromDB(name);
+			City city = getLocationCityFromDB(cityName);
+			city.setDistrict(districtName);
 			if (TextUtils.isEmpty(city.getPostID())) {
 				Toast.makeText(QueryCityActivity.this, R.string.no_this_city,
 						Toast.LENGTH_SHORT).show();
@@ -319,8 +320,12 @@ public class QueryCityActivity extends BaseActivity implements OnClickListener,
 						QueryCityActivity.this,
 						String.format(
 								getResources().getString(
-										R.string.get_location_scuess), name));
-				mLocationTV.setText(formatBigMessage(name));
+										R.string.get_location_scuess), cityName));
+				if(city.getDistrict() != null){
+					mLocationTV.setText(formatBigMessage(cityName+" "+city.getDistrict()));
+				}else{
+					mLocationTV.setText(formatBigMessage(cityName));
+				}
 			}
 		}
 

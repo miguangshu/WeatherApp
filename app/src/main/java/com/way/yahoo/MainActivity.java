@@ -46,13 +46,12 @@ import com.way.weather.plugin.spider.WeatherSpider;
 
 import menudrawer.MenuDrawer;
 
-public class MainActivity extends BaseActivity implements OnClickListener,
-		OnPageChangeListener {
+public class MainActivity extends BaseActivity implements OnClickListener,OnPageChangeListener {
 	public static final String FIRST_RUN_APP = "firstRunApp";
 	private static final String INSTANCESTATE_TAB = "tab_index";
 	private String mShareNormalStr = "#开天眼#提醒您:今天%s,%s,%s,%s,";// 日期、城市、天气、温度
 	private String mAqiShareStr = "空气质量指数(AQI):%s μg/m³,等级[%s];PM2.5浓度值:%s μg/m³。%s ";// aqi、等级、pm2.5、建议
-	private String mShareEndStr = "（请关注博客：http://blog.csdn.net/way_ping_li）";
+	private String mShareEndStr = "（）";
 	private MenuDrawer mMenuDrawer;
 	private SideMenuAdapter mMenuAdapter;
 	private int mPagerOffsetPixels;
@@ -115,7 +114,6 @@ public class MainActivity extends BaseActivity implements OnClickListener,
 		mCirclePageIndicator = (CirclePageIndicator) findViewById(R.id.indicator);
 		mCirclePageIndicator.setViewPager(mMainViewPager);
 		mCirclePageIndicator.setOnPageChangeListener(this);
-
 		mTitleTextView.setOnClickListener(this);
 		findViewById(R.id.sidebarButton).setOnClickListener(this);
 		mShareBtn = (ImageView) findViewById(R.id.shareButton);
@@ -141,8 +139,7 @@ public class MainActivity extends BaseActivity implements OnClickListener,
 	protected void onPause() {
 		super.onPause();
 		// 保存默认选择页
-		PreferenceUtils.setPrefInt(this, INSTANCESTATE_TAB,
-				mMainViewPager.getCurrentItem());
+		PreferenceUtils.setPrefInt(this, INSTANCESTATE_TAB,mMainViewPager.getCurrentItem());
 	}
 
 	private void visibleAddCityBtn() {
@@ -175,7 +172,6 @@ public class MainActivity extends BaseActivity implements OnClickListener,
 		else
 			mCirclePageIndicator.setVisibility(View.GONE);
 		mShareBtn.setEnabled(true);
-
 		int defaultTab = PreferenceUtils.getPrefInt(this, INSTANCESTATE_TAB, 0);
 		if (defaultTab > (mTmpCities.size() - 1))// 防止手动删除城市之后出现数组越界
 			defaultTab = 0;
@@ -267,8 +263,7 @@ public class MainActivity extends BaseActivity implements OnClickListener,
 					return;
 				}
 				String time = TimeUtils.getDateTime(System.currentTimeMillis());
-				String name = mFragmentAdapter.getPageTitle(
-						mMainViewPager.getCurrentItem()).toString();
+				String name = mFragmentAdapter.getPageTitle(mMainViewPager.getCurrentItem()).toString();
 				String weather = info.getRealTime().getWeather_name();
 				String temp = info.getRealTime().getTemp() + "°";
 
@@ -331,17 +326,14 @@ public class MainActivity extends BaseActivity implements OnClickListener,
 	private void initMenuDrawer() {
 		// 覆盖在View之前的侧边栏菜单
 		mMenuDrawer = MenuDrawer.attach(this, MenuDrawer.Type.BEHIND);
-		mMenuDrawer.setMenuSize(Math.round(0.6f * SystemUtils
-				.getDisplayWidth(this)));
+		mMenuDrawer.setMenuSize(Math.round(0.6f * SystemUtils.getDisplayWidth(this)));
 		// View之后的侧边栏菜单
 		// mMenuDrawer = MenuDrawer.attach(this, MenuDrawer.Type.BEHIND,
 		// Position.LEFT, MenuDrawer.MENU_DRAG_CONTENT);
-		mMenuListView = (ListView) LayoutInflater.from(this).inflate(
-				R.layout.sidemenu_listview, null);
+		mMenuListView = (ListView) LayoutInflater.from(this).inflate(R.layout.sidemenu_listview, null);
 		mMenuDrawer.setMenuView(mMenuListView);
 		mMenuDrawer.setTouchMode(MenuDrawer.TOUCH_MODE_FULLSCREEN);
-		mMenuDrawer
-				.setOnInterceptMoveEventListener(new MenuDrawer.OnInterceptMoveEventListener() {
+		mMenuDrawer.setOnInterceptMoveEventListener(new MenuDrawer.OnInterceptMoveEventListener() {
 					@Override
 					public boolean isViewDraggable(View v, int dx, int x, int y) {
 						if (v == mMainViewPager) {
@@ -351,9 +343,7 @@ public class MainActivity extends BaseActivity implements OnClickListener,
 						return false;
 					}
 				});
-		mMenuDrawer
-				.setOnDrawerStateChangeListener(new MenuDrawer.OnDrawerStateChangeListener() {
-
+		mMenuDrawer.setOnDrawerStateChangeListener(new MenuDrawer.OnDrawerStateChangeListener() {
 					@Override
 					public void onDrawerStateChange(int oldState, int newState) {
 						// TODO Auto-generated method stub
@@ -415,7 +405,6 @@ public class MainActivity extends BaseActivity implements OnClickListener,
 
 	protected void onMenuItemClicked(int position, Item item) {
 		mMenuDrawer.toggleMenu(true);// 关闭此窗口
-		// Toast.makeText(this, item.mTitleStr, Toast.LENGTH_SHORT).show();
 		switch (item.mId) {
 		case Item.INFINITE_ID:
 			startActivity(new Intent(MainActivity.this,
@@ -433,7 +422,6 @@ public class MainActivity extends BaseActivity implements OnClickListener,
 		case Item.ABOUT_ID:
 			startActivity(new Intent(MainActivity.this, AboutActivity.class));
 			break;
-
 		default:
 			if (mMainViewPager.getCurrentItem() != item.mId)
 				mMainViewPager.setCurrentItem(item.mId);

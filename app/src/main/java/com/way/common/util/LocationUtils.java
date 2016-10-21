@@ -18,7 +18,7 @@ public class LocationUtils {
 	public interface LocationListener {
 		void detecting();
 
-		void succeed(String city);
+		void succeed(String city,String district);
 
 		void failed();
 	}
@@ -76,9 +76,8 @@ public class LocationUtils {
 				}
 				return;
 			}
-
 			String city = location.getCity().replace("市", "");
-			mListener.succeed(city);
+			mListener.succeed(city,location.getDistrict());
 			stopLocation();// 停止定位
 		}
 

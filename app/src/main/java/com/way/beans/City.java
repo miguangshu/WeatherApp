@@ -6,6 +6,7 @@ import android.os.Parcelable;
 public class City implements Parcelable {
 	private String province;
 	private String city;
+	private String district;
 	private String name;
 	private String pinyin;
 	private String py;
@@ -35,12 +36,24 @@ public class City implements Parcelable {
 		this.name = name;
 		this.postID = postID;
 	}
-
-	public City(String province, String city, String name, String pinyin,
+	public City(String province, String city,String name, String pinyin,
+				String py, String phoneCode, String areaCode, String postID) {
+		super();
+		this.province = province;
+		this.city = city;
+		this.name = name;
+		this.pinyin = pinyin;
+		this.py = py;
+		this.phoneCode = phoneCode;
+		this.areaCode = areaCode;
+		this.postID = postID;
+	}
+	public City(String province, String city,String district, String name, String pinyin,
 			String py, String phoneCode, String areaCode, String postID) {
 		super();
 		this.province = province;
 		this.city = city;
+		this.district = district;
 		this.name = name;
 		this.pinyin = pinyin;
 		this.py = py;
@@ -111,6 +124,14 @@ public class City implements Parcelable {
 
 	public void setPostID(String postID) {
 		this.postID = postID;
+	}
+
+	public String getDistrict() {
+		return district;
+	}
+
+	public void setDistrict(String district) {
+		this.district = district;
 	}
 
 	public boolean getIsLocation() {
