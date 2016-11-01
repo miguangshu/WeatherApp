@@ -42,6 +42,7 @@ import com.way.ui.view.CountDownView.OnCountDownFinishedListener;
 
 public class QueryCityActivity extends BaseActivity implements OnClickListener,
 		TextWatcher, OnItemClickListener {
+	private static final String TAG = "QueryCityActivity";
 	public static final String CITY_EXTRA_KEY = "city";
 	private LayoutInflater mInflater;
 	private RelativeLayout mRootView;
@@ -52,9 +53,9 @@ public class QueryCityActivity extends BaseActivity implements OnClickListener,
 	private ImageButton mQueryCityExitBtn;
 	private ListView mQueryCityListView;
 	private GridView mHotCityGridView;
-	private List<City> mTmpCitys;
-	private List<City> mHotCitys;
-	private List<City> mCities;
+	private List<City> mTmpCitys;//临时城市列表
+	private List<City> mHotCitys;//热门城市列表
+	private List<City> mCities;//所有城市列表
 	private QueryCityAdapter mSearchCityAdapter;
 	private Filter mFilter;
 
@@ -62,7 +63,7 @@ public class QueryCityActivity extends BaseActivity implements OnClickListener,
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.city_query_layout);
-		L.i("liweiping", "QueryCityActivity onCreate...");
+		L.i(TAG, "QueryCityActivity onCreate...");
 		initDatas();
 		initViews();
 	}
@@ -70,7 +71,7 @@ public class QueryCityActivity extends BaseActivity implements OnClickListener,
 	@Override
 	protected void onResume() {
 		super.onResume();
-		L.i("liweiping", "QueryCityActivity onResume...");
+		L.i(TAG, "QueryCityActivity onResume...");
 	}
 
 	private void initViews() {
@@ -83,8 +84,7 @@ public class QueryCityActivity extends BaseActivity implements OnClickListener,
 
 		mQueryCityListView = (ListView) findViewById(R.id.cityList);
 		mQueryCityListView.setOnItemClickListener(this);
-		mSearchCityAdapter = new QueryCityAdapter(QueryCityActivity.this,
-				mCities);
+		mSearchCityAdapter = new QueryCityAdapter(QueryCityActivity.this, mCities);
 		mQueryCityListView.setAdapter(mSearchCityAdapter);
 		mQueryCityListView.setTextFilterEnabled(true);
 		mFilter = mSearchCityAdapter.getFilter();
@@ -157,12 +157,12 @@ public class QueryCityActivity extends BaseActivity implements OnClickListener,
 		switch (parent.getId()) {
 		case R.id.cityList:
 			City city = mSearchCityAdapter.getItem(position);
-			L.i("liweiping", city.getName());
+			L.i(TAG, city.getName());
 			addToTmpCityTable(city);
 			break;
 		case R.id.hotCityGrid:
 			City hotCity = mHotCitys.get(position);
-			L.i("liweiping", hotCity.getName());
+			L.i(TAG, hotCity.getName());
 			addToTmpCityTable(hotCity);
 			break;
 		default:
@@ -170,11 +170,14 @@ public class QueryCityActivity extends BaseActivity implements OnClickListener,
 		}
 	}
 
+	/**
+	 * 添加临时城市
+	 * @param city
+	 */
 	private void addToTmpCityTable(City city) {
 		// 已经存在此城市，提示一下，直接返回
 		if (mTmpCitys.contains(city)) {
-			Toast.makeText(this, R.string.city_exists, Toast.LENGTH_SHORT)
-					.show();
+			Toast.makeText(this, R.string.city_exists, Toast.LENGTH_SHORT).show();
 			return;
 		}
 		// 存储
@@ -184,9 +187,7 @@ public class QueryCityActivity extends BaseActivity implements OnClickListener,
 		tmpContentValues.put(CityConstants.REFRESH_TIME, 0L);// 无刷新时间
 		tmpContentValues.put(CityConstants.ISLOCATION, 0);// 手动选择的城市存储为0
 		tmpContentValues.put(CityConstants.ORDER_INDEX, mTmpCitys.size());
-		mContentResolver.insert(CityProvider.TMPCITY_CONTENT_URI,
-				tmpContentValues);
-
+		mContentResolver.insert(CityProvider.TMPCITY_CONTENT_URI, tmpContentValues);
 		Intent i = new Intent();
 		i.putExtra(CITY_EXTRA_KEY, city);
 		setResult(RESULT_OK, i);
@@ -299,7 +300,7 @@ public class QueryCityActivity extends BaseActivity implements OnClickListener,
 
 		@Override
 		public void detecting() {
-			L.i("liweiping", "detecting...");
+			L.i(TAG, "detecting...");
 			showCountDownView();
 		}
 
@@ -314,12 +315,11 @@ public class QueryCityActivity extends BaseActivity implements OnClickListener,
 				Toast.makeText(QueryCityActivity.this, R.string.no_this_city,
 						Toast.LENGTH_SHORT).show();
 			} else {
-				L.i("liweiping", "location" + city.toString());
-				addOrUpdateLocationCity(city);
+				L.i(TAG, "location" + city.toString());
+				addOrUpdateLocationCity(city);//添加或更新已经定位城市
 				T.showShort(
 						QueryCityActivity.this,
-						String.format(
-								getResources().getString(
+						String.format(getResources().getString(
 										R.string.get_location_scuess), cityName));
 				if(city.getDistrict() != null){
 					mLocationTV.setText(formatBigMessage(cityName+" "+city.getDistrict()));
@@ -331,8 +331,7 @@ public class QueryCityActivity extends BaseActivity implements OnClickListener,
 
 		@Override
 		public void failed() {
-			Toast.makeText(QueryCityActivity.this, R.string.getlocation_fail,
-					Toast.LENGTH_SHORT).show();
+			Toast.makeText(QueryCityActivity.this, R.string.getlocation_fail, Toast.LENGTH_SHORT).show();
 		}
 
 	};
@@ -392,7 +391,6 @@ public class QueryCityActivity extends BaseActivity implements OnClickListener,
 			} else {
 				viewHoler.selectedIV.setVisibility(View.GONE);
 			}
-
 			return convertView;
 		}
 

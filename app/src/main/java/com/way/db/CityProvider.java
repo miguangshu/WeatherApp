@@ -35,8 +35,7 @@ public class CityProvider extends ContentProvider {
 	public static final Uri TMPCITY_CONTENT_URI = Uri.parse("content://"
 			+ AUTHORITY + "/" + TMPCITY_TABLE_NAME);// 临时城市 uri
 
-	private static final UriMatcher URI_MATCHER = new UriMatcher(
-			UriMatcher.NO_MATCH);// 匹配
+	private static final UriMatcher URI_MATCHER = new UriMatcher(UriMatcher.NO_MATCH);// 匹配
 
 	private static final int CITYS = 1;// 多个城市查询
 	private static final int CITY_ID = 2;// 单个城市查询
@@ -62,19 +61,17 @@ public class CityProvider extends ContentProvider {
 	public static void createTmpCityTable(Context context) {
 		SQLiteDatabase db = context.openOrCreateDatabase(
 				SystemUtils.getDBFilePath(context), Context.MODE_PRIVATE, null);
-		L.i("liweiping", "create table tmpcity ....");
+		L.i(TAG, "create table tmpcity ....");
 		db.execSQL("CREATE table IF NOT EXISTS "
 				+ TMPCITY_TABLE_NAME
-				+ " (_id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, postID TEXT,"
+				+ " (_id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, postID TEXT,district TEXT,"
 				+ " refreshTime TEXT, isLocation TEXT, pubTime TEXT, weatherInfo TEXT, orderIndex INTEGER)");
 	}
 
 	@Override
 	public boolean onCreate() {
-		mSqLiteDatabase = getContext().openOrCreateDatabase(
-				SystemUtils.getDBFilePath(getContext()), Context.MODE_PRIVATE,
-				null);
-		L.i("liweiping", "create db....");
+		mSqLiteDatabase = getContext().openOrCreateDatabase(SystemUtils.getDBFilePath(getContext()), Context.MODE_PRIVATE, null);
+		L.i(TAG, "create db....");
 		return true;
 	}
 
@@ -155,22 +152,17 @@ public class CityProvider extends ContentProvider {
 			throw new IllegalArgumentException("Cannot insert into URL: " + uri);
 		}
 
-		ContentValues values = (initialValues != null) ? new ContentValues(
-				initialValues) : new ContentValues();
-
+		ContentValues values = (initialValues != null) ? new ContentValues(initialValues) : new ContentValues();
 		// for (String colName : CityConstants.getRequiredColumns()) {
 		// if (values.containsKey(colName) == false) {
 		// throw new IllegalArgumentException("Missing column: " + colName);
 		// }
 		// }
 
-		long rowId = mSqLiteDatabase.insert(TMPCITY_TABLE_NAME,
-				CityConstants.REFRESH_TIME, values);
-
+		long rowId = mSqLiteDatabase.insert(TMPCITY_TABLE_NAME,CityConstants.REFRESH_TIME, values);
 		if (rowId < 0) {
 			throw new SQLException("Failed to insert row into " + uri);
 		}
-
 		Uri noteUri = ContentUris.withAppendedId(TMPCITY_CONTENT_URI, rowId);
 		getContext().getContentResolver().notifyChange(noteUri, null);// 发出通知
 		return noteUri;
@@ -244,6 +236,7 @@ public class CityProvider extends ContentProvider {
 		public static final String ID = "_id";
 		public static final String PROVINCE = "province";
 		public static final String CITY = "city";
+		public static final String DISTRICT = "district";
 		public static final String NAME = "name";
 		public static final String PINYIN = "pinyin";
 		public static final String PY = "py";

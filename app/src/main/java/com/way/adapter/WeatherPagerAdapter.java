@@ -50,8 +50,7 @@ public class WeatherPagerAdapter extends FragmentPagerAdapter {
 		Log.i(TAG, "instantiateItem...");
 		Fragment fragment = (Fragment) super.instantiateItem(container,
 				position);
-		final WeakReference<Fragment> weakFragment = mFragmentArray
-				.get(position);
+		final WeakReference<Fragment> weakFragment = mFragmentArray.get(position);
 		if (weakFragment != null) {
 			weakFragment.clear();
 		}
@@ -89,12 +88,7 @@ public class WeatherPagerAdapter extends FragmentPagerAdapter {
 	public CharSequence getPageTitle(int position) {
 		City city = mCitys.get(position);
 		String cityName = "--";
-		if(city.getIsLocation()){
-			cityName = city.getName()+city.getAreaCode();
-		}else {
-			cityName = city.getName();
-		}
-
+		cityName = city.getName();
 		return cityName;
 	}
 

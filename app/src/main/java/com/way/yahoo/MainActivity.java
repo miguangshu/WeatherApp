@@ -47,6 +47,7 @@ import com.way.weather.plugin.spider.WeatherSpider;
 import menudrawer.MenuDrawer;
 
 public class MainActivity extends BaseActivity implements OnClickListener,OnPageChangeListener {
+	private static final String TAG = "MainActivity";
 	public static final String FIRST_RUN_APP = "firstRunApp";
 	private static final String INSTANCESTATE_TAB = "tab_index";
 	private String mShareNormalStr = "#开天眼#提醒您:今天%s,%s,%s,%s,";// 日期、城市、天气、温度
@@ -60,6 +61,7 @@ public class MainActivity extends BaseActivity implements OnClickListener,OnPage
 	private ImageView mBlurImageView;
 	private ImageView mShareBtn;
 	private ImageView mLocationIV;
+	private ImageView mCameraBtn;
 	private Button mAddCityBtn;
 
 	private ListView mMenuListView;
@@ -118,12 +120,15 @@ public class MainActivity extends BaseActivity implements OnClickListener,OnPage
 		findViewById(R.id.sidebarButton).setOnClickListener(this);
 		mShareBtn = (ImageView) findViewById(R.id.shareButton);
 		mShareBtn.setOnClickListener(this);
+		mCameraBtn = (ImageView) findViewById(R.id.main_camera_btn);
+		mCameraBtn.setOnClickListener(this);
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
 		mTmpCities = getTmpCities();
+		//如果有临时城市
 		if (!mTmpCities.isEmpty()) {
 			updateUI();
 		} else {
@@ -151,9 +156,10 @@ public class MainActivity extends BaseActivity implements OnClickListener,OnPage
 	}
 
 	private void updateUI() {
-		L.i("MainActivity updateUI...");
-		// 第一次进来没有数据
+		L.i(TAG,"MainActivity updateUI...");
+		// 临时城市没有数据
 		if (mTmpCities.isEmpty()) {
+			//将添加城市按钮置为可见
 			visibleAddCityBtn();
 			return;
 		}
@@ -193,10 +199,12 @@ public class MainActivity extends BaseActivity implements OnClickListener,OnPage
 		case R.id.shareButton:
 			shareTo();
 			break;
+		case R.id.main_camera_btn:
+			startActivity(new Intent(MainActivity.this,CameraActivity.class));
+			break;
 		case R.id.location_city_textview:
 		case R.id.add_city_btn:
-			startActivity(new Intent(MainActivity.this,
-					ManagerCityActivity.class));
+			startActivity(new Intent(MainActivity.this,ManagerCityActivity.class));
 			break;
 		default:
 			break;
@@ -206,14 +214,11 @@ public class MainActivity extends BaseActivity implements OnClickListener,OnPage
 	private void shareTo() {
 		new AsyncTask<Void, Void, File>() {
 			Dialog dialog;
-
 			@Override
 			protected void onPreExecute() {
 				super.onPreExecute();
-				dialog = SystemUtils.getCustomeDialog(MainActivity.this,
-						R.style.load_dialog, R.layout.custom_progress_dialog);
-				TextView titleTxtv = (TextView) dialog
-						.findViewById(R.id.dialogText);
+				dialog = SystemUtils.getCustomeDialog(MainActivity.this, R.style.load_dialog, R.layout.custom_progress_dialog);
+				TextView titleTxtv = (TextView) dialog.findViewById(R.id.dialogText);
 				titleTxtv.setText(R.string.please_wait);
 				dialog.show();
 			}
@@ -411,10 +416,8 @@ public class MainActivity extends BaseActivity implements OnClickListener,OnPage
 					ManagerCityActivity.class));
 			break;
 		case Item.SETTING_ID:
-
 			break;
 		case Item.SHARE_ID:
-
 			break;
 		case Item.FEEDBACK_ID:
 			startActivity(new Intent(MainActivity.this, FeedBackActivity.class));

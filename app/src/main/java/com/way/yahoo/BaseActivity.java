@@ -81,7 +81,8 @@ public class BaseActivity extends SwipeBackActivity {
 
 		// 存储
 		ContentValues tmpContentValues = new ContentValues();
-		tmpContentValues.put(CityConstants.NAME, city.getName());
+		tmpContentValues.put(CityConstants.NAME, city.getName()+city.getDistrict());
+		tmpContentValues.put(CityConstants.DISTRICT,city.getDistrict());
 		tmpContentValues.put(CityConstants.POST_ID, city.getPostID());
 		tmpContentValues.put(CityConstants.REFRESH_TIME, 0L);// 无刷新时间
 		tmpContentValues.put(CityConstants.ISLOCATION, 1);// 手动选择的城市存储为0

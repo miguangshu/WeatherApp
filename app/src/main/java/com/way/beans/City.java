@@ -30,7 +30,16 @@ public class City implements Parcelable {
 		this.pubTime = pubTime;
 		this.weatherInfoStr = weatherInfoStr;
 	}
-
+	public City(String name, String postID, long refreshTime, int isLocation, long pubTime, String weatherInfoStr,String district) {
+		super();
+		this.name = name;
+		this.postID = postID;
+		this.refreshTime = refreshTime;
+		this.isLocation = isLocation;
+		this.pubTime = pubTime;
+		this.weatherInfoStr = weatherInfoStr;
+		this.district = district;
+	}
 	public City(String name, String postID) {
 		super();
 		this.name = name;
