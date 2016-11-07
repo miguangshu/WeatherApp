@@ -12,20 +12,44 @@
         android:id="@+id/rectOnCamera"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
-
+    <com.way.ui.view.CircleOnCamera
+        android:id="@+id/circleOnCamera"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <Button
+        <ImageView
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
-            android:layout_marginBottom="20dp"
+            android:layout_marginBottom="5dp"
             android:id="@+id/takePic"
-            android:layout_width="80dp"
-            android:layout_height="50dp"
-            android:background="#88427ac7"
-            android:text="拍照"
-            android:textColor="#aaa" />
+            android:layout_width="65dp"
+            android:layout_height="65dp"
+            android:src="@drawable/btn_take_photo"
+            />
+        <ImageView
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="5dp"
+            android:id="@+id/btnUpload"
+            android:layout_width="65dp"
+            android:layout_height="65dp"
+            android:visibility="invisible"
+            android:src="@drawable/button_circle_ok"
+            />
+        <ImageView
+            android:id="@+id/btnCancel"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true"
+            android:layout_centerInParent="true"
+            android:layout_marginRight="20dp"
+            android:layout_marginBottom="10dp"
+            android:scaleType="fitXY"
+            android:alpha="0.5"
+            android:background="@drawable/btn_close"/>
     </RelativeLayout>
 </FrameLayout>

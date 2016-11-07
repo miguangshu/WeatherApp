@@ -1,6 +1,7 @@
 package com.way.ui.view;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.hardware.Camera;
@@ -11,23 +12,23 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.WindowManager;
-import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.way.common.util.BitmapUtils;
+import com.way.common.util.FileUtils;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.List;
+import java.util.Date;
 
-/**
- * Created by dyk on 2016/4/6.
- */
+@SuppressWarnings("deprecation")
 public class CameraSurfaceView extends SurfaceView implements SurfaceHolder.Callback, Camera.AutoFocusCallback {
 
     private static final String TAG = "CameraSurfaceView";
+    public static final String SD_IMAGES_PATH = Environment.getExternalStorageDirectory().getPath() + File.separator + "PM25" + File.separator;
+    public static final String DATA_IMAGES_PATH = "/data/data/PM25/images/";
 
     private Context mContext;
     private SurfaceHolder holder;
@@ -35,8 +36,10 @@ public class CameraSurfaceView extends SurfaceView implements SurfaceHolder.Call
 
     private int mScreenWidth;
     private int mScreenHeight;
-
-
+    private int viewWidth;
+    private int viewHeight;
+    //所拍摄图片的路径
+    private String picPath;
     public CameraSurfaceView(Context context) {
         this(context, null);
     }
@@ -64,6 +67,9 @@ public class CameraSurfaceView extends SurfaceView implements SurfaceHolder.Call
         holder = getHolder();//获得surfaceHolder引用
         holder.addCallback(this);
         holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);//设置类型
+        viewHeight = holder.getSurfaceFrame().height();
+        viewWidth = holder.getSurfaceFrame().width();
+        Log.i(TAG, "viewHeight:" + viewHeight + ",viewWidth:" + viewWidth);
     }
 
     @Override
@@ -74,7 +80,7 @@ public class CameraSurfaceView extends SurfaceView implements SurfaceHolder.Call
             try {
                 mCamera.setPreviewDisplay(holder);//摄像头画面显示在Surface上
             } catch (IOException e) {
-                Log.e(TAG,e.getMessage());
+                Log.e(TAG, e.getMessage());
                 e.printStackTrace();
             }
         }
@@ -84,7 +90,8 @@ public class CameraSurfaceView extends SurfaceView implements SurfaceHolder.Call
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
         Log.i(TAG, "surfaceChanged");
         //设置参数并开始预览
-        setCameraParams(mCamera, mScreenWidth, mScreenHeight);
+        updateCameraParameters(mCamera);
+//        setCameraParams(mCamera, mScreenWidth, mScreenHeight);
         mCamera.startPreview();
     }
 
@@ -96,12 +103,12 @@ public class CameraSurfaceView extends SurfaceView implements SurfaceHolder.Call
         mCamera = null;
         holder = null;
     }
-    
+
     @Override
     public void onAutoFocus(boolean success, Camera Camera) {
         if (success) {
-            mCamera.autoFocus(null);//只有加上了这一句，才会自动对焦。
-            Log.i(TAG, "onAutoFocus success="+success);
+            Camera.cancelAutoFocus();
+            Log.i(TAG, "onAutoFocus success=" + success);
         }
     }
 
@@ -109,7 +116,7 @@ public class CameraSurfaceView extends SurfaceView implements SurfaceHolder.Call
     private Camera.ShutterCallback shutter = new Camera.ShutterCallback() {
         @Override
         public void onShutter() {
-            Log.i(TAG,"shutter");
+            Log.i(TAG, "shutter");
         }
     };
 
@@ -130,23 +137,23 @@ public class CameraSurfaceView extends SurfaceView implements SurfaceHolder.Call
             BufferedOutputStream bos = null;
             Bitmap bm = null;
             try {
-            	// 获得图片
+                // 获得图片
                 bm = BitmapFactory.decodeByteArray(data, 0, data.length);
-                bm = BitmapUtils.resizeImage(bm, 256, 256);
-
+                bm = BitmapUtils.resizeImage(bm, 255, 255);
                 if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-                    Log.i(TAG, "Environment.getExternalStorageDirectory()="+Environment.getExternalStorageDirectory());
-                    String filePath = "/sdcard/dyk"+System.currentTimeMillis()+".jpg";//照片保存路径
-                    File file = new File(filePath);
-                    if (!file.exists()){
-                        file.createNewFile();
-                    }
+                    Log.i(TAG, "Environment.getExternalStorageDirectory()=" + Environment.getExternalStorageDirectory());
+                    String imageDir = getImageDir();
+                    String filePath = imageDir + "/OMG_" + System.currentTimeMillis() + ".jpg";//照片保存路径
+                    File file = FileUtils.createFile(filePath);
+                    Log.i(TAG, filePath);
                     bos = new BufferedOutputStream(new FileOutputStream(file));
                     bm.compress(Bitmap.CompressFormat.JPEG, 100, bos);//将图片压缩到流中
-                }else{
-                    Toast.makeText(mContext,"没有检测到内存卡", Toast.LENGTH_SHORT).show();
+                    picPath = filePath;
+                } else {
+                    Toast.makeText(mContext, "没有检测到内存卡", Toast.LENGTH_SHORT).show();
                 }
             } catch (Exception e) {
+                Log.e(TAG, e.getMessage());
                 e.printStackTrace();
             } finally {
                 try {
@@ -154,100 +161,142 @@ public class CameraSurfaceView extends SurfaceView implements SurfaceHolder.Call
                     bos.close();//关闭
                     bm.recycle();// 回收bitmap空间
                     mCamera.stopPreview();// 关闭预览
-                    mCamera.startPreview();// 开启预览
                 } catch (IOException e) {
+                    Log.e(TAG, e.getMessage());
                     e.printStackTrace();
                 }
             }
         }
     };
 
+    /**
+     * 获得拍摄图片路径
+     * @return
+     */
+    public String getPicPath(){
+        return this.picPath;
+    }
     public Camera getCamera() {
         return mCamera;
     }
 
-    public void setAutoFocus(){
+    public void setAutoFocus() {
         mCamera.autoFocus(this);
     }
 
-    public void takePicture(){
+    public void takePicture() {
         //设置参数,并拍照
-        setCameraParams(mCamera, mScreenWidth, mScreenHeight);
-        // 当调用camera.takePiture方法后，camera关闭了预览，这时需要调用startPreview()来重新开启预览
+        updateCameraParameters(mCamera);
+        // 当调用camera.takePiture方法后，camera关闭了预览
         mCamera.takePicture(null, null, jpeg);
     }
 
-    private void setCameraParams(Camera camera, int width, int height) {
-        Log.i(TAG,"setCameraParams  width="+width+"  height="+height);
-        Camera.Parameters parameters = mCamera.getParameters();
-        // 获取摄像头支持的PictureSize列表
-        List<Camera.Size> pictureSizeList = parameters.getSupportedPictureSizes();
-        for (Camera.Size size : pictureSizeList) {
-            Log.i(TAG, "pictureSizeList size.width=" + size.width + "  size.height=" + size.height);
-        }
-        /**从列表中选取合适的分辨率*/
-        Camera.Size picSize = getProperSize(pictureSizeList, ((float) height / width));
-        if (null == picSize) {
-            Log.i(TAG, "null == picSize");
-            picSize = parameters.getPictureSize();
-        }
-        Log.i(TAG, "picSize.width=" + picSize.width + "  picSize.height=" + picSize.height);
-         // 根据选出的PictureSize重新设置SurfaceView大小
-        float w = picSize.width;
-        float h = picSize.height;
-        parameters.setPictureSize(picSize.width,picSize.height);
-        this.setLayoutParams(new FrameLayout.LayoutParams((int) (height*(h/w)), height));
-
-        // 获取摄像头支持的PreviewSize列表
-        List<Camera.Size> previewSizeList = parameters.getSupportedPreviewSizes();
-
-        for (Camera.Size size : previewSizeList) {
-            Log.i(TAG, "previewSizeList size.width=" + size.width + "  size.height=" + size.height);
-        }
-        Camera.Size preSize = getProperSize(previewSizeList, ((float) height) / width);
-        if (null != preSize) {
-            Log.i(TAG, "preSize.width=" + preSize.width + "  preSize.height=" + preSize.height);
-            parameters.setPreviewSize(preSize.width, preSize.height);
-        }
-
-        parameters.setJpegQuality(100); // 设置照片质量
-        if (parameters.getSupportedFocusModes().contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
-            Log.i(TAG,"SET FOCUS_MODE_CONTINUOUS_PICTURE");
-            parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);// 连续对焦模式
-        }
-
-        mCamera.cancelAutoFocus();//自动对焦。
-        mCamera.setDisplayOrientation(90);// 设置PreviewDisplay的方向，效果就是将捕获的画面旋转多少度显示
-        mCamera.setParameters(parameters);
-
+    /**
+     * 给外部调用者开放一个重新设置相机参数的方法
+     */
+    public void resetCamerParams() {
+        updateCameraParameters(mCamera);
+        mCamera.startPreview();
     }
 
     /**
-     * 从列表中选取合适的分辨率
-     * 默认w:h = 4:3
-     * <p>注意：这里的w对应屏幕的height
-     *            h对应屏幕的width<p/>
+     * 更新相机参数
+     *
+     * @param camera
      */
-    private Camera.Size getProperSize(List<Camera.Size> pictureSizeList, float screenRatio) {
-        Log.i(TAG, "screenRatio=" + screenRatio);
-        Camera.Size result = null;
-        for (Camera.Size size : pictureSizeList) {
-            float currentRatio = ((float) size.width) / size.height;
-            if (currentRatio - screenRatio == 0) {
-                result = size;
-                break;
+    private void updateCameraParameters(Camera camera) {
+        if (camera != null) {
+            Camera.Parameters p = camera.getParameters();
+            long time = new Date().getTime();
+            p.setGpsTimestamp(time);
+            Camera.Size previewSize = findBestPreviewSize(p);
+            p.setPreviewSize(previewSize.width, previewSize.height);
+            //这里设置图片的分辨率为预览图像的分辨率大小，这样拍照后的照片就与看到的一样（主要是清晰度），实际上可以根据需求自定定义
+            p.setPictureSize(previewSize.width, previewSize.height);
+            if (mContext.getResources().getConfiguration().orientation != Configuration.ORIENTATION_LANDSCAPE) {
+                camera.setDisplayOrientation(90);
+                p.setRotation(90);
             }
+            if (p.getSupportedFocusModes().contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
+                Log.i(TAG, "SET FOCUS_MODE_CONTINUOUS_PICTURE");
+                p.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);// 连续对焦模式
+            }
+            p.setJpegQuality(100);
+            camera.cancelAutoFocus();
+            camera.setParameters(p);
         }
+    }
 
-        if (null == result) {
-            for (Camera.Size size : pictureSizeList) {
-                float curRatio = ((float) size.width) / size.height;
-                if (curRatio == 4f / 3) {// 默认w:h = 4:3
-                    result = size;
-                    break;
-                }
+    /**
+     * 找到最合适的显示分辨率 （防止预览图像变形）
+     *
+     * @param parameters
+     * @return
+     */
+    private Camera.Size findBestPreviewSize(Camera.Parameters parameters) {
+        //系统支持的所有预览分辨率
+        String previewSizeValueString = parameters.get("preview-size-values");
+        if (previewSizeValueString == null) {
+            previewSizeValueString = parameters.get("preview-size-value");
+        }
+        Log.i(TAG, previewSizeValueString);
+        if (previewSizeValueString == null) { // 有些手机例如m9获取不到支持的预览大小 就直接返回屏幕大小
+            return mCamera.new Size(mScreenWidth, mScreenHeight);
+        }
+        float bestX = 0;
+        float bestY = 0;
+
+        float tmpRatio = 0;
+        float viewRatio = 0;
+        if (viewWidth != 0 && viewHeight != 0) {
+            viewRatio = Math.min((float) viewWidth, (float) viewHeight) / Math.max((float) viewWidth, (float) viewHeight);
+        }
+        String[] COMMA_PATTERN = previewSizeValueString.split(",");
+        Log.i(TAG, "previewSizeValueString:" + previewSizeValueString);
+        for (String prewsizeString : COMMA_PATTERN) {
+            prewsizeString = prewsizeString.trim();
+            int dimPosition = prewsizeString.indexOf('x');
+            if (dimPosition == -1) {
+                continue;
+            }
+            float newX = 0;
+            float newY = 0;
+            try {
+                newX = Float.parseFloat(prewsizeString.substring(0, dimPosition));
+                newY = Float.parseFloat(prewsizeString.substring(dimPosition + 1));
+            } catch (NumberFormatException e) {
+                continue;
+            }
+            float ratio = Math.min(newX, newY) / Math.max(newX, newY);
+            if (viewRatio == 0) {
+                viewRatio = ratio;
+                bestX = newX;
+                bestY = newY;
+            } else if (viewRatio != 0 && (Math.abs(ratio - viewRatio)) < (Math.abs(ratio - viewRatio))) {
+                tmpRatio = ratio;
+                bestX = newX;
+                bestY = newY;
             }
         }
-        return result;
+        if (bestX > 0 && bestY > 0) {
+            return mCamera.new Size((int) bestX, (int) bestY);
+        }
+        return null;
+    }
+
+    /**
+     * 获取拍摄图片存储路径
+     *
+     * @return
+     */
+    private String getImageDir() {
+        String storagePath = null;
+        String sdStatus = Environment.getExternalStorageState();
+        if (sdStatus.equals(Environment.MEDIA_MOUNTED)) { // 检测sd是否可用
+            storagePath = SD_IMAGES_PATH;
+        } else {
+            storagePath = DATA_IMAGES_PATH;
+        }
+        return storagePath;
     }
 }

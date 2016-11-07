@@ -154,7 +154,6 @@ public class UploadUtil {
             if (param != null && param.size() > 0) {
                 Iterator<String> it = param.keySet().iterator();
                 while (it.hasNext()) {
-                    sb = null;
                     sb = new StringBuffer();
                     String key = it.next();
                     String value = param.get(key);
@@ -171,21 +170,19 @@ public class UploadUtil {
             sb = null;
             params = null;
             sb = new StringBuffer();
-/**
- * 这里重点注意： name里面的值为服务器端需要key 只有这个key 才可以得到对应的文件
- * filename是文件的名字，包含后缀名的 比如:abc.png
- */
+            /**
+             * 这里重点注意： name里面的值为服务器端需要key 只有这个key 才可以得到对应的文件
+             * filename是文件的名字，包含后缀名的 比如:abc.png
+             */
             sb.append(PREFIX).append(BOUNDARY).append(LINE_END);
-            sb.append("Content-Disposition:form-data; name=\"" + fileKey
-                    + "\"; filename=\"" + file.getName() + "\"" + LINE_END);
+            sb.append("Content-Disposition:form-data;name=\"" + fileKey + "\"; filename=\"" + file.getName() + "\"" + LINE_END);
             sb.append("Content-Type:image/pjpeg" + LINE_END); // 这里配置的Content-type很重要的 ，用于服务器端辨别文件的类型的
             sb.append(LINE_END);
             params = sb.toString();
             sb = null;
-
             Log.i(TAG, file.getName() + "=" + params + "##");
             dos.write(params.getBytes());
-/**上传文件*/
+            /**上传文件*/
             InputStream is = new FileInputStream(file);
             onUploadProcessListener.initUpload((int)file.length());
             byte[] bytes = new byte[1024];
@@ -197,7 +194,6 @@ public class UploadUtil {
                 onUploadProcessListener.onUploadProcess(curLen);
             }
             is.close();
-
             dos.write(LINE_END.getBytes());
             byte[] end_data = (PREFIX + BOUNDARY + PREFIX + LINE_END).getBytes();
             dos.write(end_data);
@@ -234,6 +230,11 @@ public class UploadUtil {
             e.printStackTrace();
             return;
         } catch (IOException e) {
+            sendMessage(UPLOAD_SERVER_ERROR_CODE,"上传失败：error=" + e.getMessage());
+            e.printStackTrace();
+            return;
+        }catch(Exception e){
+            Log.e(TAG,e.getMessage());
             sendMessage(UPLOAD_SERVER_ERROR_CODE,"上传失败：error=" + e.getMessage());
             e.printStackTrace();
             return;
